@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yhteystiedot</title>
+    <title>Kirjatoive</title>
 </head>
 <body>
     <header>
@@ -16,20 +16,226 @@
     <nav>
         <ul>
             <li><a href="index.html">Etusivu</a></li>
-            <li><a href="about.html">Tietoja</a></li>
-            <li><a href="contact.html">Yhteystiedot</a></li>
-            <li><a href="listing.html">Kirjat</a></li>
+            <li><a href="about.html">Tietoja meistä</a></li>
+            <li>
+                <a href="contact.html" aria-current="page">Kirjatoive</a>
+            </li>
+            <li><a href="listing.html">Kirjavalikoima</a></li>
         </ul>
     </nav>
+
+    <main>
+        <h2>Jätä kirjatoive</h2>
+        <p>
+            Eikö etsimääsi kirjaa löytynyt valikoimastamme?
+            Kerro meille, mitä etsit, niin Erkki pitää silmät auki.
+            Voit kertoa myös esimerkiksi toivotun painoksen tai kunnon.
+        </p>
+        <p id="lomakeohje">
+            Sähköpostiosoite on pakollinen. Anna lisäksi vähintään
+            kirjan nimi tai kirjailija. Lisätiedot ovat vapaaehtoisia.
+        </p>
+        <p>
+            Lomakkeen lähetys ei ole vielä käytössä.
+            Voit tarkistaa kirjatoiveesi ja nähdä sen yhteenvedon,
+            mutta tietoja ei lähetetä antikvariaatille.
+        </p>
+
+        <form id="kirjatoive"
+              aria-describedby="lomakeohje"
+              novalidate>
+            <div>
+                <label for="sahkoposti">
+                    Sähköpostiosoite (pakollinen)
+                </label>
+                <input type="email"
+                       id="sahkoposti"
+                       name="sahkoposti"
+                       autocomplete="email"
+                       aria-describedby="sahkopostivirhe"
+                       required>
+                <p id="sahkopostivirhe" hidden></p>
+            </div>
+
+            <fieldset>
+                <legend>Etsimäsi kirja</legend>
+                <p id="kirjaohje">
+                    Täytä vähintään toinen seuraavista kentistä.
+                </p>
+
+                <div>
+                    <label for="kirjannimi">Kirjan nimi</label>
+                    <input type="text"
+                           id="kirjannimi"
+                           name="kirjannimi"
+                           aria-describedby="kirjaohje kirjavirhe">
+                </div>
+
+                <div>
+                    <label for="kirjailija">Kirjailija</label>
+                    <input type="text"
+                           id="kirjailija"
+                           name="kirjailija"
+                           aria-describedby="kirjaohje kirjavirhe">
+                </div>
+
+                <p id="kirjavirhe" hidden></p>
+            </fieldset>
+
+            <div>
+                <label for="lisatiedot">Lisätiedot (vapaaehtoinen)</label>
+                <textarea id="lisatiedot"
+                          name="lisatiedot"
+                          rows="5"></textarea>
+            </div>
+
+            <button type="submit" id="tarkista" disabled>
+                Tarkista toive
+            </button>
+
+            <noscript>
+                <p>
+                    Kirjatoiveen tarkistaminen vaatii
+                    JavaScriptin käyttöönoton.
+                </p>
+            </noscript>
+        </form>
+
+        <p id="lomaketilanne" role="status"></p>
+
+        <section id="yhteenveto" aria-labelledby="yhteenveto-otsikko" hidden>
+            <h3 id="yhteenveto-otsikko" tabindex="-1">
+                Kirjatoiveesi yhteenveto
+            </h3>
+            <p>
+                Toiveesi on valmis. Sähköpostilähetys ei ole vielä
+                käytössä, joten tietoja ei ole lähetetty antikvariaatille.
+            </p>
+
+            <dl>
+                <dt>Sähköpostiosoite</dt>
+                <dd id="yhteenveto-sahkoposti"></dd>
+
+                <dt>Kirjan nimi</dt>
+                <dd id="yhteenveto-nimi"></dd>
+
+                <dt>Kirjailija</dt>
+                <dd id="yhteenveto-kirjailija"></dd>
+
+                <dt>Lisätiedot</dt>
+                <dd id="yhteenveto-lisatiedot"></dd>
+            </dl>
+
+            <p>
+                Voit muokata tietoja yllä olevalla lomakkeella
+                ja tarkistaa toiveen uudelleen.
+            </p>
+        </section>
+    </main>
 
     <footer>
         <div class="footer-content">
             <!-- Sarake 1: Yrityksen tiedot -->
             <div class="footer-section">
-                <h2>© 2026 Antikvariaatti Vanha Sivu</h2>
+                <p>© 2026 Antikvariaatti Vanha Sivu</p>
                 <p>Asiantuntevaa palvelua vuodesta 2026.</p>
             </div>
         </div>
     </footer>
+
+    <script>
+        const lomake = document.getElementById("kirjatoive");
+        const sahkoposti = document.getElementById("sahkoposti");
+        const kirjannimi = document.getElementById("kirjannimi");
+        const kirjailija = document.getElementById("kirjailija");
+        const lisatiedot = document.getElementById("lisatiedot");
+
+        const sahkopostivirhe = document.getElementById("sahkopostivirhe");
+        const kirjavirhe = document.getElementById("kirjavirhe");
+        const lomaketilanne = document.getElementById("lomaketilanne");
+        const yhteenveto = document.getElementById("yhteenveto");
+
+        lomake.addEventListener("submit", function (tapahtuma) {
+            // Estä lomakkeen lähetys ja sivun uudelleenlataus.
+            tapahtuma.preventDefault();
+
+            yhteenveto.hidden = true;
+            lomaketilanne.textContent = "";
+
+            sahkopostivirhe.hidden = true;
+            kirjavirhe.hidden = true;
+
+            sahkoposti.removeAttribute("aria-invalid");
+            kirjannimi.removeAttribute("aria-invalid");
+            kirjailija.removeAttribute("aria-invalid");
+
+            const osoite = sahkoposti.value.trim();
+            const nimi = kirjannimi.value.trim();
+            const tekija = kirjailija.value.trim();
+            const lisatieto = lisatiedot.value.trim();
+
+            sahkoposti.value = osoite;
+
+            let ensimmainenVirhe = null;
+
+            // Tarkista sähköpostiosoite selaimen validoinnilla.
+            if (!sahkoposti.validity.valid) {
+                sahkopostivirhe.textContent = osoite === ""
+                    ? "Anna sähköpostiosoitteesi."
+                    : "Tarkista sähköpostiosoite, esimerkiksi nimi@example.fi.";
+
+                sahkopostivirhe.hidden = false;
+                sahkoposti.setAttribute("aria-invalid", "true");
+                ensimmainenVirhe = sahkoposti;
+            }
+
+            // Vähintään kirjan nimi tai kirjailija tarvitaan.
+            if (nimi === "" && tekija === "") {
+                kirjavirhe.textContent =
+                    "Anna vähintään kirjan nimi tai kirjailija.";
+
+                kirjavirhe.hidden = false;
+                kirjannimi.setAttribute("aria-invalid", "true");
+                kirjailija.setAttribute("aria-invalid", "true");
+
+                if (ensimmainenVirhe === null) {
+                    ensimmainenVirhe = kirjannimi;
+                }
+            }
+
+            if (ensimmainenVirhe !== null) {
+                lomaketilanne.textContent =
+                    "Tarkista lomakkeen tiedot. Virheet on kerrottu kenttien yhteydessä.";
+
+                ensimmainenVirhe.focus();
+                return;
+            }
+
+            // Näytä syötetyt tiedot tekstinä turvallisesti.
+            document.getElementById("yhteenveto-sahkoposti")
+                .textContent = osoite;
+
+            document.getElementById("yhteenveto-nimi")
+                .textContent = nimi || "Ei annettu";
+
+            document.getElementById("yhteenveto-kirjailija")
+                .textContent = tekija || "Ei annettu";
+
+            document.getElementById("yhteenveto-lisatiedot")
+                .textContent = lisatieto || "Ei lisätietoja";
+
+            yhteenveto.hidden = false;
+            document.getElementById("yhteenveto-otsikko").focus();
+        });
+
+        // Piilota vanha yhteenveto, jos tietoja muutetaan.
+        lomake.addEventListener("input", function () {
+            yhteenveto.hidden = true;
+            lomaketilanne.textContent = "";
+        });
+
+        // Ota painike käyttöön, kun lomakkeen käsittely on valmis.
+        document.getElementById("tarkista").disabled = false;
+    </script>
 </body>
 </html>

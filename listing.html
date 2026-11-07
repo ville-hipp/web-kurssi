@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirjat</title>
+    <title>Kirjavalikoima</title>
 </head>
 <body>
     <header>
@@ -16,20 +16,192 @@
     <nav>
         <ul>
             <li><a href="index.html">Etusivu</a></li>
-            <li><a href="about.html">Tietoja</a></li>
-            <li><a href="contact.html">Yhteystiedot</a></li>
-            <li><a href="listing.html">Kirjat</a></li>
+            <li><a href="about.html">Tietoja meistä</a></li>
+            <li><a href="contact.html">Kirjatoive</a></li>
+            <li><a href="listing.html" aria-current="page">Kirjavalikoima</a></li>
         </ul>
     </nav>
+
+    <main>
+        <h2>Kirjavalikoima</h2>
+        <p>
+            Etsi seuraava lukuelämyksesi kirjan nimellä tai kirjailijalla.
+            Jokaisen kirjan yhteydessä näet sen kunnon ja hinnan.
+        </p>
+        <p>
+            Tämä on esimerkkivalikoima.
+            Hinnat ja kuntotiedot ovat testitietoja.
+        </p>
+
+        <form id="kirjahaku" role="search">
+            <label for="hakusana">
+                Hae kirjan nimellä tai kirjailijalla
+            </label>
+            <input type="search"
+                   id="hakusana"
+                   name="hakusana"
+                   placeholder="Esimerkiksi Kalevala tai Tove Jansson">
+            <button type="submit">Hae</button>
+        </form>
+
+        <p id="hakutilanne" role="status"></p>
+
+        <div id="kirjalista"></div>
+
+        <p id="ei-tuloksia" hidden>
+            Etsimääsi kirjaa ei löytynyt.
+            <a href="contact.html">Jätä kirjatoive</a>,
+            niin Erkki pitää silmät auki.
+        </p>
+
+        <button type="button" id="nayta-lisaa" hidden>
+            Näytä lisää
+        </button>
+
+        <noscript>
+            <p>
+                Kirjavalikoiman selaaminen vaatii
+                JavaScriptin käyttöönoton.
+            </p>
+        </noscript>
+    </main>
 
     <footer>
         <div class="footer-content">
             <!-- Sarake 1: Yrityksen tiedot -->
             <div class="footer-section">
-                <h2>© 2026 Antikvariaatti Vanha Sivu</h2>
+                <p>© 2026 Antikvariaatti Vanha Sivu</p>
                 <p>Asiantuntevaa palvelua vuodesta 2026.</p>
             </div>
         </div>
     </footer>
+
+    <script>
+        // Esimerkkikirjat: nimi, kirjailija, kunto ja hinta euroina.
+        const kirjat = [
+            ["Seitsemän veljestä", "Aleksis Kivi", "Hyvä, kannessa kulumaa", 8],
+            ["Kalevala", "Elias Lönnrot", "Tyydyttävä, sivut kellastuneet", 12],
+            ["Tuntematon sotilas", "Väinö Linna", "Hyvä, siistit sivut", 10],
+            ["Täällä Pohjantähden alla", "Väinö Linna", "Hyvä, selässä kulumaa", 14],
+            ["Sinuhe egyptiläinen", "Mika Waltari", "Hyvä, kansipaperi puuttuu", 15],
+            ["Muumipeikko ja pyrstötähti", "Tove Jansson", "Hyvä, siistit sivut", 9],
+            ["Taikurin hattu", "Tove Jansson", "Tyydyttävä, omistuskirjoitus", 7],
+            ["Vaarallinen juhannus", "Tove Jansson", "Hyvä, vähäistä kulumaa", 8],
+            ["Muumipappa ja meri", "Tove Jansson", "Hyvä, siistit sivut", 10],
+            ["Kesäkirja", "Tove Jansson", "Hyvä, kannessa pieni taitos", 9],
+            ["Jäniksen vuosi", "Arto Paasilinna", "Hyvä, siistit sivut", 6],
+            ["Ulvova mylläri", "Arto Paasilinna", "Tyydyttävä, kannet kuluneet", 5],
+            ["Puhdistus", "Sofi Oksanen", "Erittäin hyvä, vähäisiä käytön jälkiä", 9],
+            ["Koirapuisto", "Sofi Oksanen", "Hyvä, siistit sivut", 8],
+            ["Pieni merenneito", "H. C. Andersen", "Tyydyttävä, sivuissa tahroja", 4],
+            ["Ylpeys ja ennakkoluulo", "Jane Austen", "Hyvä, selässä lukutaitoksia", 7],
+            ["Emma", "Jane Austen", "Hyvä, siistit sivut", 8],
+            ["Hobitti", "J. R. R. Tolkien", "Hyvä, kannessa kulumaa", 12],
+            ["Sormuksen ritarit", "J. R. R. Tolkien", "Hyvä, omistuskirjoitus", 11],
+            ["Kaksi tornia", "J. R. R. Tolkien", "Hyvä, siistit sivut", 11],
+            ["Kuninkaan paluu", "J. R. R. Tolkien", "Tyydyttävä, selkä kulunut", 9],
+            ["Eikä yksikään pelastunut", "Agatha Christie", "Hyvä, sivut kellastuneet", 6],
+            ["Idän pikajunan arvoitus", "Agatha Christie", "Hyvä, siistit sivut", 7],
+            ["Baskervillen koira", "Arthur Conan Doyle", "Hyvä, kannessa kulumaa", 6],
+            ["Aarresaari", "Robert Louis Stevenson", "Tyydyttävä, omistuskirjoitus", 5]
+        ];
+
+        const erakoko = 20;
+        let hakutulokset = kirjat;
+        let naytetty = 0;
+
+        const hakulomake = document.getElementById("kirjahaku");
+        const hakukentta = document.getElementById("hakusana");
+        const kirjalista = document.getElementById("kirjalista");
+        const hakutilanne = document.getElementById("hakutilanne");
+        const eiTuloksia = document.getElementById("ei-tuloksia");
+        const lisaaPainike = document.getElementById("nayta-lisaa");
+
+        const hintamuoto = new Intl.NumberFormat("fi-FI", {
+            style: "currency",
+            currency: "EUR"
+        });
+
+        // Lisää näkyviin seuraavat enintään 20 hakutulosta.
+        function naytaLisaa() {
+            const seuraavat = hakutulokset.slice(
+                naytetty,
+                naytetty + erakoko
+            );
+            const ensimmainenUusi = kirjalista.children.length;
+
+            for (const [nimi, kirjailija, kunto, hinta] of seuraavat) {
+                const kortti = document.createElement("article");
+
+                const otsikko = document.createElement("h3");
+                otsikko.textContent = nimi;
+                otsikko.tabIndex = -1;
+
+                const tekija = document.createElement("p");
+                tekija.textContent = `Kirjailija: ${kirjailija}`;
+
+                const kuntotieto = document.createElement("p");
+                kuntotieto.textContent = `Kunto: ${kunto}`;
+
+                const hintatieto = document.createElement("p");
+                hintatieto.textContent =
+                    `Hinta: ${hintamuoto.format(hinta)}`;
+
+                kortti.append(otsikko, tekija, kuntotieto, hintatieto);
+                kirjalista.append(kortti);
+            }
+
+            naytetty += seuraavat.length;
+
+            eiTuloksia.hidden = hakutulokset.length !== 0;
+            lisaaPainike.hidden = naytetty >= hakutulokset.length;
+
+            if (hakutulokset.length === 0) {
+                hakutilanne.textContent = "Hakutuloksia: 0.";
+            } else {
+                hakutilanne.textContent =
+                    `Näytetään ${naytetty} / ${hakutulokset.length} kirjaa.` +
+                    (lisaaPainike.hidden
+                        ? " Kaikki tulokset on näytetty."
+                        : "");
+            }
+
+            return kirjalista.children[ensimmainenUusi]
+                ?.querySelector("h3");
+        }
+
+        // Haku tehdään lomakkeen lähetyksellä tai Enter-näppäimellä.
+        hakulomake.addEventListener("submit", function (tapahtuma) {
+            tapahtuma.preventDefault();
+
+            const hakusana = hakukentta.value
+                .trim()
+                .toLocaleLowerCase("fi-FI");
+
+            hakutulokset = kirjat.filter(function (kirja) {
+                const nimi = kirja[0].toLocaleLowerCase("fi-FI");
+                const kirjailija = kirja[1].toLocaleLowerCase("fi-FI");
+
+                return nimi.includes(hakusana) ||
+                    kirjailija.includes(hakusana);
+            });
+
+            naytetty = 0;
+            kirjalista.replaceChildren();
+            naytaLisaa();
+        });
+
+        // Siirrä kohdistus ensimmäiseen lisättyyn kirjaan.
+        lisaaPainike.addEventListener("click", function () {
+            const ensimmainenUusiOtsikko = naytaLisaa();
+
+            if (ensimmainenUusiOtsikko) {
+                ensimmainenUusiOtsikko.focus();
+            }
+        });
+
+        // Näytä ensimmäinen erä sivun avautuessa.
+        naytaLisaa();
+    </script>
 </body>
 </html>

@@ -34,11 +34,12 @@ Ensimmäinen versio sisältää luettelon ja kirjatoiveen valmistelun. Ostoskori
 
 ## 3. Sisältösuunnitelma
 
-Ehdotan kolmea sivua. Kirjaluettelo toimii samalla etusivuna, jotta asiakas pääsee suoraan etsimään kirjoja.
+Ehdotan neljää sivua.
 
 | Sivu | Tarkoitus | Sisältö | Kävijän seuraava askel |
 | --- | --- | --- | --- |
-| **Kirjaluettelo / etusivu** | Auttaa löytämään kirja nopeasti. | Lyhyt tervetuloteksti, nimellä tai kirjailijalla toimiva haku, kirjatiedot, erissä lataaminen ja ohjaus kirjatoiveeseen, jos tuloksia ei ole. | Jatkaa selaamista, ottaa yhteyttä löytyneestä kirjasta tai siirtyy toivelomakkeelle. |
+| **Etusivu** | Lyhyt tervetuloteksti | Kertoa vierailijalle, että mistä sivustossa on kyse | Siirtyä joko selaamaan kirjavalikoimaa tai jättämään kirjatoive |
+| **Kirjaluettelo** | Auttaa löytämään kirja nopeasti. | Nimellä tai kirjailijalla toimiva haku, kirjatiedot, erissä lataaminen ja ohjaus kirjatoiveeseen, jos tuloksia ei ole. | Jatkaa selaamista, ottaa yhteyttä löytyneestä kirjasta tai siirtyy toivelomakkeelle. |
 | **Jätä kirjatoive** | Auttaa kuvailemaan etsityn kirjan ja valmistelemaan toiveen. | Lyhyt ohje, sähköpostiosoite, kirjan nimi, kirjailija, vapaaehtoiset lisätiedot sekä virheviestit. Lomakkeen yhteydessä kerrotaan, ettei lähetys vielä toimi. | Tarkistaa toiveen ja näkee valmiin yhteenvedon samalla sivulla. |
 | **Tietoa ja yhteystiedot** | Esittelee liikkeen ja helpottaa asiointia. | Lyhyt esittely Erkistä ja antikvariaatista, liikkeen kuva, osoite, aukioloajat, puhelinnumero ja sähköposti. | Ottaa yhteyttä tai suunnittelee käynnin liikkeessä. |
 

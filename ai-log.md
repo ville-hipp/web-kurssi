@@ -15,3 +15,7 @@ A: Kokosin saatavilla olevasta projektikeskustelusta ja plan.md-suunnitelmasta t
 Q: Luo logo kuvitteelliselle yritykselle "Antikvariaatti Vanha Sivu".
 
 A: Loin läpinäkyvätaustaisen logon, jossa on avoin kirja, klassinen kirjasintyyli sekä metsänvihreän ja kullan sävyt.
+
+Q: Lisää kaikille sivuille sivua vastaava toiminnallisuus
+
+A: Lisättiin <main> osiot, sekä kirjaluettelo ja kirjatoive-lomakkeet
