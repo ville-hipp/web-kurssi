@@ -1,0 +1,178 @@
+/* Vanhan Sivun vaalea paletti, kirjasimet ja välit */
+:root {
+    color-scheme: light dark;
+    --color-page: #f7f3e8;
+    --color-panel: #fffaf0;
+    --color-text: #1f3d2b;
+    --color-accent: #c8902e;
+    --font-heading: Georgia, "Times New Roman", serif;
+    --font-body: Arial, Helvetica, sans-serif;
+    --space-small: 0.5rem;
+    --space-medium: 1rem;
+    --space-large: 1.5rem;
+    --space-section: 2rem;
+    --content-width: 68rem;
+}
+
+/* Tumma tila seuraa käyttäjän järjestelmäasetusta. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-page: #14251b;
+        --color-panel: #20372a;
+        --color-text: #f7f3e8;
+        --color-accent: #e4b55b;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--color-page);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    line-height: 1.2;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: inherit;
+    text-underline-offset: 0.15em;
+}
+
+/* Fokus näkyy myös silloin, kun hiiri ei ole linkin päällä. */
+:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 3px;
+}
+
+body > header, body > nav, body > footer {
+    background-color: var(--color-panel);
+    padding-inline: max(var(--space-medium), calc((100% - var(--content-width)) / 2));
+}
+
+body > header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-medium);
+    padding-block: var(--space-large);
+}
+
+body > header img {
+    display: block;
+    width: 10rem;
+}
+
+nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-small);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body > nav {
+    padding-block: var(--space-small);
+    border-bottom: 3px solid var(--color-accent);
+}
+
+nav a {
+    display: block;
+    padding: var(--space-small);
+}
+
+nav a:hover, nav a[aria-current="page"] {
+    background-color: var(--color-page);
+    text-decoration-thickness: 0.15em;
+}
+
+main {
+    flex: 1;
+    width: 100%;
+    max-width: calc(var(--content-width) + 2 * var(--space-medium));
+    margin-inline: auto;
+    padding: var(--space-section) var(--space-medium);
+}
+
+form {
+    max-width: 36rem;
+}
+
+fieldset {
+    min-inline-size: 0;
+}
+
+input, select, textarea, button {
+    max-width: 100%;
+    font: inherit;
+    color: inherit;
+}
+
+input:not([type="checkbox"], [type="radio"]), select, textarea, button {
+    padding: var(--space-small);
+    border: 1px solid var(--color-text);
+    border-radius: 0.25rem;
+    background-color: var(--color-panel);
+}
+
+textarea {
+    resize: vertical;
+}
+
+button, input[type="submit"] {
+    border: 1px solid var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-page);
+    cursor: pointer;
+}
+
+body > footer {
+    margin-top: auto;
+    padding-block: var(--space-large);
+    border-top: 3px solid var(--color-accent);
+}
+
+.footer-content {
+    display: grid;
+    gap: var(--space-medium);
+}
+
+.footer-section > :first-child {
+    margin-top: 0;
+}
+
+/* Leveällä näytöllä logo ja otsikko sekä alatunnisteen osiot asettuvat rinnakkain. */
+@media (min-width: 48rem) {
+    body > header {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-large);
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-large);
+    }
+}
