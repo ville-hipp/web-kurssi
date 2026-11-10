@@ -2,7 +2,7 @@
 
 Tiivistelmä saatavilla olevista Antikvariaatti Vanha Sivu -projektin keskusteluista.
 
-**Tehtävä E1**
+# Tehtävä E1
 
 Q: Voitko laatia kuvitteellisen Antikvariaatti Vanhan Sivun toimeksiannosta asiakkaalle osoitetun plan.md-suunnitelman? Suunnitelmassa tulee käsitellä seitsemän annettua kohtaa ja vertailla kolmea oikeaa saman alan sivustoa.
 
@@ -18,4 +18,9 @@ A: Loin läpinäkyvätaustaisen logon, jossa on avoin kirja, klassinen kirjasint
 
 Q: Lisää kaikille sivuille sivua vastaava toiminnallisuus
 
-A: Lisättiin <main> osiot, sekä kirjaluettelo ja kirjatoive-lomakkeet
+A: Lisättiin `<main>` osiot, sekä kirjaluettelo ja kirjatoive-lomakkeet
+
+# Tehtävä E2
+
+- Apua moodboardin luonnissa
+- Havainnollistava kuva moodboardiin luotu AI:lla
