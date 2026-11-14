@@ -26,7 +26,7 @@ Leipäteksti taustalla: 10,76 : 1
 
 ## Lähteet
 
-![Vanhoja kirjoja puisessa hyllyssä lämpimässä valossa](images/kirjahylly.jpg)
+![Vanhoja kirjoja puisessa hyllyssä lämpimässä valossa](images/kirjahylly.png)
 Kuva: luotu tekoälyllä Vanhan Sivun moodboardia varten.
 
 Kuva havainnollistaa Vanhan Sivun lämmintä ja rauhallista tunnelmaa.

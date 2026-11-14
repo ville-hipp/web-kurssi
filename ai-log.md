@@ -24,3 +24,4 @@ A: Lisättiin `<main>` osiot, sekä kirjaluettelo ja kirjatoive-lomakkeet
 
 - Apua moodboardin luonnissa
 - Havainnollistava kuva moodboardiin luotu AI:lla
+- Apua style.css -tyylitiedoston luonnissa
