@@ -25,3 +25,9 @@ A: Lisättiin `<main>` osiot, sekä kirjaluettelo ja kirjatoive-lomakkeet
 - Apua moodboardin luonnissa
 - Havainnollistava kuva moodboardiin luotu AI:lla
 - Apua style.css -tyylitiedoston luonnissa
+
+# Tehtävä E3
+
+- Neuvoja `localstorage` - tallennuksen toimintaan
+- Apua popover-valikon kanssa
+- Skriptien siistiminen app.js tiedostoon
