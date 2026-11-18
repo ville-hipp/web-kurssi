@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirjatoive</title>
     <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
 </head>
 <body>
     <header>
@@ -143,100 +144,5 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        const lomake = document.getElementById("kirjatoive");
-        const sahkoposti = document.getElementById("sahkoposti");
-        const kirjannimi = document.getElementById("kirjannimi");
-        const kirjailija = document.getElementById("kirjailija");
-        const lisatiedot = document.getElementById("lisatiedot");
-
-        const sahkopostivirhe = document.getElementById("sahkopostivirhe");
-        const kirjavirhe = document.getElementById("kirjavirhe");
-        const lomaketilanne = document.getElementById("lomaketilanne");
-        const yhteenveto = document.getElementById("yhteenveto");
-
-        lomake.addEventListener("submit", function (tapahtuma) {
-            // Estä lomakkeen lähetys ja sivun uudelleenlataus.
-            tapahtuma.preventDefault();
-
-            yhteenveto.hidden = true;
-            lomaketilanne.textContent = "";
-
-            sahkopostivirhe.hidden = true;
-            kirjavirhe.hidden = true;
-
-            sahkoposti.removeAttribute("aria-invalid");
-            kirjannimi.removeAttribute("aria-invalid");
-            kirjailija.removeAttribute("aria-invalid");
-
-            const osoite = sahkoposti.value.trim();
-            const nimi = kirjannimi.value.trim();
-            const tekija = kirjailija.value.trim();
-            const lisatieto = lisatiedot.value.trim();
-
-            sahkoposti.value = osoite;
-
-            let ensimmainenVirhe = null;
-
-            // Tarkista sähköpostiosoite selaimen validoinnilla.
-            if (!sahkoposti.validity.valid) {
-                sahkopostivirhe.textContent = osoite === ""
-                    ? "Anna sähköpostiosoitteesi."
-                    : "Tarkista sähköpostiosoite, esimerkiksi nimi@example.fi.";
-
-                sahkopostivirhe.hidden = false;
-                sahkoposti.setAttribute("aria-invalid", "true");
-                ensimmainenVirhe = sahkoposti;
-            }
-
-            // Vähintään kirjan nimi tai kirjailija tarvitaan.
-            if (nimi === "" && tekija === "") {
-                kirjavirhe.textContent =
-                    "Anna vähintään kirjan nimi tai kirjailija.";
-
-                kirjavirhe.hidden = false;
-                kirjannimi.setAttribute("aria-invalid", "true");
-                kirjailija.setAttribute("aria-invalid", "true");
-
-                if (ensimmainenVirhe === null) {
-                    ensimmainenVirhe = kirjannimi;
-                }
-            }
-
-            if (ensimmainenVirhe !== null) {
-                lomaketilanne.textContent =
-                    "Tarkista lomakkeen tiedot. Virheet on kerrottu kenttien yhteydessä.";
-
-                ensimmainenVirhe.focus();
-                return;
-            }
-
-            // Näytä syötetyt tiedot tekstinä turvallisesti.
-            document.getElementById("yhteenveto-sahkoposti")
-                .textContent = osoite;
-
-            document.getElementById("yhteenveto-nimi")
-                .textContent = nimi || "Ei annettu";
-
-            document.getElementById("yhteenveto-kirjailija")
-                .textContent = tekija || "Ei annettu";
-
-            document.getElementById("yhteenveto-lisatiedot")
-                .textContent = lisatieto || "Ei lisätietoja";
-
-            yhteenveto.hidden = false;
-            document.getElementById("yhteenveto-otsikko").focus();
-        });
-
-        // Piilota vanha yhteenveto, jos tietoja muutetaan.
-        lomake.addEventListener("input", function () {
-            yhteenveto.hidden = true;
-            lomaketilanne.textContent = "";
-        });
-
-        // Ota painike käyttöön, kun lomakkeen käsittely on valmis.
-        document.getElementById("tarkista").disabled = false;
-    </script>
 </body>
 </html>

@@ -148,6 +148,38 @@ button, input[type="submit"] {
     cursor: pointer;
 }
 
+#kirjavalikoiman-ohjeet {
+    max-width: min(25rem, calc(100% - 2 * var(--space-medium)));
+    padding: var(--space-medium);
+    border: 1px solid var(--color-text);
+    border-radius: 0.25rem;
+    background-color: var(--color-panel);
+    color: var(--color-text);
+}
+
+#kirjavalikoiman-ohjeet p {
+    margin: 0 0 var(--space-small);
+}
+
+#kirjavalikoiman-ohjeet ul {
+    margin: 0;
+    padding-inline-start: var(--space-large);
+}
+
+@supports (position-area: bottom span-right) {
+    #kirjavalikoiman-ohjeet-painike {
+        anchor-name: --kirjavalikoiman-ohjeet;
+    }
+
+    #kirjavalikoiman-ohjeet {
+        position-anchor: --kirjavalikoiman-ohjeet;
+        position-area: bottom span-right;
+        position-try-fallbacks: flip-block;
+        inset: auto;
+        margin: var(--space-small) 0;
+    }
+}
+
 body > footer {
     margin-top: auto;
     padding-block: var(--space-large);
