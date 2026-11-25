@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tietoja meistä</title>
     <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
 </head>
 <body>
     <header>
@@ -17,7 +18,7 @@
     <nav>
         <ul>
             <li><a href="index.html">Etusivu</a></li>
-            <li><a href="about.html">Tietoja meistä</a></li>
+            <li><a href="about.html" aria-current="page">Tietoja meistä</a></li>
             <li><a href="contact.html">Kirjatoive</a></li>
             <li><a href="listing.html">Kirjavalikoima</a></li>
         </ul>
@@ -40,6 +41,18 @@
             <a href="contact.html">Kirjatoive</a>,
             niin pidämme silmät auki etsimäsi kirjan varalta.
         </p>
+
+        <section aria-labelledby="myymala-otsikko">
+            <h3 id="myymala-otsikko">Myymälän tiedot</h3>
+            <p id="asiakastilanne" role="status" tabindex="-1"></p>
+            <dl id="asiakastiedot" hidden></dl>
+            <button type="button" id="lataa-asiakastiedot-uudelleen" hidden>
+                Yritä uudelleen
+            </button>
+            <noscript>
+                <p>Myymälän tietojen lataaminen vaatii JavaScriptin käyttöönoton.</p>
+            </noscript>
+        </section>
     </main>
     <footer>
         <div class="footer-content">

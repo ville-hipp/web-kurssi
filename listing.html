@@ -30,10 +30,6 @@
             Etsi seuraava lukuelämyksesi kirjan nimellä tai kirjailijalla.
             Jokaisen kirjan yhteydessä näet sen kunnon ja hinnan.
         </p>
-        <p>
-            Tämä on esimerkkivalikoima.
-            Hinnat ja kuntotiedot ovat testitietoja.
-        </p>
 
         <p>
             <button type="button"
@@ -57,16 +53,19 @@
             <input type="search"
                    id="hakusana"
                    name="hakusana"
-                   placeholder="Esimerkiksi Kalevala tai Tove Jansson">
+                   placeholder="Esimerkiksi järvi tai Ylönen">
             <button type="submit">Hae</button>
         </form>
 
-        <p id="hakutilanne" role="status"></p>
+        <p id="hakutilanne" role="status" tabindex="-1"></p>
+        <button type="button" id="lataa-kirjat-uudelleen" hidden>
+            Yritä uudelleen
+        </button>
 
         <div id="kirjalista"></div>
 
         <p id="ei-tuloksia" hidden>
-            Etsimääsi kirjaa ei löytynyt.
+            Etsitkö tiettyä kirjaa?
             <a href="contact.html">Jätä kirjatoive</a>,
             niin Erkki pitää silmät auki.
         </p>

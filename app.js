@@ -1,3 +1,51 @@
+const RAJAPINTA = "https://vectorsigma.org/briefer/api/v1/";
+const ASIAKASNUMERO = 10;
+
+function rajapinnanOsoite(reitti) {
+    const osoite = new URL(reitti, RAJAPINTA);
+    osoite.searchParams.set("customer", ASIAKASNUMERO);
+    osoite.searchParams.set("lang", "fi");
+    return osoite;
+}
+
+async function haeJson(osoite, naytaTilanne, signaali) {
+    const enintaanYrityksia = 3;
+
+    for (let yritys = 1; ; yritys++) {
+        // Aikaraja koskee yhtä pyyntöä. Uusi haku voi myös perua sen.
+        const aikaraja = AbortSignal.timeout(15000);
+        const pyyntosignaali = signaali
+            ? AbortSignal.any([signaali, aikaraja])
+            : aikaraja;
+        pyyntosignaali.throwIfAborted();
+
+        const vastaus = await fetch(osoite, { signal: pyyntosignaali });
+        pyyntosignaali.throwIfAborted();
+
+        if (vastaus.ok) {
+            return vastaus.json();
+        }
+
+        if (vastaus.status !== 429 || yritys === enintaanYrityksia) {
+            throw new Error(`HTTP ${vastaus.status}`);
+        }
+
+        const retryAfter = vastaus.headers.get("Retry-After");
+        const odotus = retryAfter && /^\d+$/.test(retryAfter)
+            ? Number(retryAfter)
+            : 3;
+
+        naytaTilanne(
+            `Ladataan… Palvelin on ruuhkautunut. Yritetään uudelleen ${odotus} s kuluttua.`
+        );
+        await new Promise(resolve => setTimeout(resolve, odotus * 1000));
+    }
+}
+
+function rajapinnanTeksti(arvo) {
+    return typeof arvo === "string" ? arvo.trim() : "";
+}
+
 function alustaKirjavalikoima() {
     const hakulomake = document.getElementById("kirjahaku");
 
@@ -5,44 +53,12 @@ function alustaKirjavalikoima() {
         return;
     }
 
-    // Esimerkkikirjat: nimi, kirjailija, kunto ja hinta euroina.
-    const kirjat = [
-        ["Seitsemän veljestä", "Aleksis Kivi", "Hyvä, kannessa kulumaa", 8],
-        ["Kalevala", "Elias Lönnrot", "Tyydyttävä, sivut kellastuneet", 12],
-        ["Tuntematon sotilas", "Väinö Linna", "Hyvä, siistit sivut", 10],
-        ["Täällä Pohjantähden alla", "Väinö Linna", "Hyvä, selässä kulumaa", 14],
-        ["Sinuhe egyptiläinen", "Mika Waltari", "Hyvä, kansipaperi puuttuu", 15],
-        ["Muumipeikko ja pyrstötähti", "Tove Jansson", "Hyvä, siistit sivut", 9],
-        ["Taikurin hattu", "Tove Jansson", "Tyydyttävä, omistuskirjoitus", 7],
-        ["Vaarallinen juhannus", "Tove Jansson", "Hyvä, vähäistä kulumaa", 8],
-        ["Muumipappa ja meri", "Tove Jansson", "Hyvä, siistit sivut", 10],
-        ["Kesäkirja", "Tove Jansson", "Hyvä, kannessa pieni taitos", 9],
-        ["Jäniksen vuosi", "Arto Paasilinna", "Hyvä, siistit sivut", 6],
-        ["Ulvova mylläri", "Arto Paasilinna", "Tyydyttävä, kannet kuluneet", 5],
-        ["Puhdistus", "Sofi Oksanen", "Erittäin hyvä, vähäisiä käytön jälkiä", 9],
-        ["Koirapuisto", "Sofi Oksanen", "Hyvä, siistit sivut", 8],
-        ["Pieni merenneito", "H. C. Andersen", "Tyydyttävä, sivuissa tahroja", 4],
-        ["Ylpeys ja ennakkoluulo", "Jane Austen", "Hyvä, selässä lukutaitoksia", 7],
-        ["Emma", "Jane Austen", "Hyvä, siistit sivut", 8],
-        ["Hobitti", "J. R. R. Tolkien", "Hyvä, kannessa kulumaa", 12],
-        ["Sormuksen ritarit", "J. R. R. Tolkien", "Hyvä, omistuskirjoitus", 11],
-        ["Kaksi tornia", "J. R. R. Tolkien", "Hyvä, siistit sivut", 11],
-        ["Kuninkaan paluu", "J. R. R. Tolkien", "Tyydyttävä, selkä kulunut", 9],
-        ["Eikä yksikään pelastunut", "Agatha Christie", "Hyvä, sivut kellastuneet", 6],
-        ["Idän pikajunan arvoitus", "Agatha Christie", "Hyvä, siistit sivut", 7],
-        ["Baskervillen koira", "Arthur Conan Doyle", "Hyvä, kannessa kulumaa", 6],
-        ["Aarresaari", "Robert Louis Stevenson", "Tyydyttävä, omistuskirjoitus", 5]
-    ];
-
-    const erakoko = 20;
-    let hakutulokset = kirjat;
-    let naytetty = 0;
-
     const hakukentta = document.getElementById("hakusana");
     const kirjalista = document.getElementById("kirjalista");
     const hakutilanne = document.getElementById("hakutilanne");
     const eiTuloksia = document.getElementById("ei-tuloksia");
     const lisaaPainike = document.getElementById("nayta-lisaa");
+    const uudelleenPainike = document.getElementById("lataa-kirjat-uudelleen");
     const ohjevalikko = document.getElementById("kirjavalikoiman-ohjeet");
     const hakuunLinkki = ohjevalikko.querySelector('a[href="#hakusana"]');
 
@@ -51,91 +67,264 @@ function alustaKirjavalikoima() {
         currency: "EUR"
     });
 
-    // Lisää näkyviin seuraavat enintään 20 hakutulosta.
-    function naytaLisaa() {
-        const seuraavat = hakutulokset.slice(
-            naytetty,
-            naytetty + erakoko
-        );
-        const ensimmainenUusi = kirjalista.children.length;
+    // Rajapinnan kuntoluokitus asteikolla 1–5.
+    const kuntoluokat = new Map([
+        [1, "Huono"],
+        [2, "Kulunut"],
+        [3, "Kohtalainen"],
+        [4, "Hyvä"],
+        [5, "Kuin uusi"]
+    ]);
 
-        for (const [nimi, kirjailija, kunto, hinta] of seuraavat) {
+    let hakusana = "";
+    let seuraavaSivu = null;
+    let naytetty = 0;
+    let aktiivinenPyynto = null;
+
+    function lisaaKirjakortit(kirjat) {
+        const kortit = document.createDocumentFragment();
+        let ensimmainenOtsikko = null;
+
+        for (const kirja of kirjat) {
             const kortti = document.createElement("article");
 
             const otsikko = document.createElement("h3");
-            otsikko.textContent = nimi;
+            otsikko.textContent = rajapinnanTeksti(kirja.title) || "Nimetön kirja";
             otsikko.tabIndex = -1;
 
             const tekija = document.createElement("p");
+            const kirjailija = rajapinnanTeksti(kirja.author) || "Ei ilmoitettu";
             tekija.textContent = `Kirjailija: ${kirjailija}`;
 
             const kuntotieto = document.createElement("p");
+            const kunto = kuntoluokat.get(kirja.condition) ?? "Ei ilmoitettu";
             kuntotieto.textContent = `Kunto: ${kunto}`;
 
             const hintatieto = document.createElement("p");
-            hintatieto.textContent =
-                `Hinta: ${hintamuoto.format(hinta)}`;
+            const hinta = Number.isFinite(kirja.price)
+                ? hintamuoto.format(kirja.price)
+                : "Kysy liikkeestä";
+            hintatieto.textContent = `Hinta: ${hinta}`;
 
             kortti.append(otsikko, tekija, kuntotieto, hintatieto);
-            kirjalista.append(kortti);
+            kortit.append(kortti);
+            ensimmainenOtsikko ??= otsikko;
         }
 
-        naytetty += seuraavat.length;
-
-        eiTuloksia.hidden = hakutulokset.length !== 0;
-        lisaaPainike.hidden = naytetty >= hakutulokset.length;
-
-        if (hakutulokset.length === 0) {
-            hakutilanne.textContent = "Hakutuloksia: 0.";
-        } else {
-            hakutilanne.textContent =
-                `Näytetään ${naytetty} / ${hakutulokset.length} kirjaa.` +
-                (lisaaPainike.hidden
-                    ? " Kaikki tulokset on näytetty."
-                    : "");
-        }
-
-        return kirjalista.children[ensimmainenUusi]
-            ?.querySelector("h3");
+        kirjalista.append(kortit);
+        return ensimmainenOtsikko;
     }
 
-    // Haku tehdään lomakkeen lähetyksellä tai Enter-näppäimellä.
+    async function lataaKirjoja(lataaLisaa = false) {
+        aktiivinenPyynto?.abort();
+        aktiivinenPyynto = new AbortController();
+        const signaali = aktiivinenPyynto.signal;
+
+        if (!lataaLisaa) {
+            seuraavaSivu = null;
+            naytetty = 0;
+            kirjalista.replaceChildren();
+            lisaaPainike.hidden = true;
+        }
+
+        if (document.activeElement === uudelleenPainike) {
+            hakutilanne.focus();
+        }
+
+        uudelleenPainike.hidden = true;
+        eiTuloksia.hidden = true;
+        lisaaPainike.setAttribute("aria-disabled", "true");
+        kirjalista.setAttribute("aria-busy", "true");
+
+        const osoite = rajapinnanOsoite("items");
+        const haku = hakusana.toLocaleLowerCase("fi-FI");
+
+        if (haku) {
+            osoite.searchParams.set("q", hakusana);
+        }
+
+        const latausviesti = lataaLisaa
+            ? "Ladataan lisää kirjoja…"
+            : "Ladataan kirjavalikoimaa…";
+        let kursori = seuraavaSivu;
+        let sivu;
+        let kirjat;
+
+        try {
+            do {
+                if (kursori !== null) {
+                    osoite.searchParams.set("cursor", kursori);
+                }
+
+                hakutilanne.textContent = latausviesti;
+                sivu = await haeJson(osoite, viesti => {
+                    hakutilanne.textContent = viesti;
+                }, signaali);
+                signaali.throwIfAborted();
+
+                if (!Array.isArray(sivu?.items)) {
+                    throw new Error("Rajapinnan vastauksesta puuttuu kirjalista.");
+                }
+
+                // Rajapinnan haku rajaa koko valikoimaa. Suodatin säilyttää
+                // hakutuloksissa kirjan nimen tai kirjailijan osumat.
+                kirjat = sivu.items.filter(kirja => {
+                    if (!kirja) {
+                        return false;
+                    }
+
+                    return !haku || [kirja.title, kirja.author].some(arvo =>
+                        rajapinnanTeksti(arvo).toLocaleLowerCase("fi-FI").includes(haku)
+                    );
+                });
+
+                kursori = sivu.next ?? null;
+            } while (kirjat.length === 0 && kursori !== null);
+
+            const siirraKohdistus = lataaLisaa && (
+                document.activeElement === lisaaPainike ||
+                document.activeElement === document.body
+            );
+            const ensimmainenOtsikko = lisaaKirjakortit(kirjat);
+
+            seuraavaSivu = kursori;
+            naytetty += kirjat.length;
+            lisaaPainike.hidden = seuraavaSivu === null;
+            eiTuloksia.hidden = naytetty !== 0;
+
+            if (naytetty === 0) {
+                hakutilanne.textContent = haku
+                    ? "Hakusanalla ei löytynyt kirjoja."
+                    : "Valikoimassa ei juuri nyt ole kirjoja.";
+            } else {
+                const maara = !haku && Number.isInteger(sivu.total) && sivu.total >= naytetty
+                    ? `${naytetty} / ${sivu.total}`
+                    : naytetty;
+                hakutilanne.textContent = `Näytetään ${maara} kirjaa.`;
+
+                if (lisaaPainike.hidden) {
+                    hakutilanne.textContent += " Kaikki tulokset on näytetty.";
+                }
+            }
+
+            if (siirraKohdistus) {
+                (ensimmainenOtsikko ?? hakutilanne).focus();
+            }
+        } catch {
+            if (signaali.aborted) {
+                return;
+            }
+
+            hakutilanne.textContent = lataaLisaa
+                ? "Lisää kirjoja ei voitu ladata. Kokeile Näytä lisää -painiketta uudelleen."
+                : "Kirjavalikoimaa ei voitu ladata. Yritä uudelleen.";
+            uudelleenPainike.hidden = lataaLisaa;
+        } finally {
+            if (!signaali.aborted) {
+                aktiivinenPyynto = null;
+                kirjalista.removeAttribute("aria-busy");
+                lisaaPainike.removeAttribute("aria-disabled");
+            }
+        }
+    }
+
     hakulomake.addEventListener("submit", function (tapahtuma) {
         tapahtuma.preventDefault();
-
-        const hakusana = hakukentta.value
-            .trim()
-            .toLocaleLowerCase("fi-FI");
-
-        hakutulokset = kirjat.filter(function (kirja) {
-            const nimi = kirja[0].toLocaleLowerCase("fi-FI");
-            const kirjailija = kirja[1].toLocaleLowerCase("fi-FI");
-
-            return nimi.includes(hakusana) ||
-                kirjailija.includes(hakusana);
-        });
-
-        naytetty = 0;
-        kirjalista.replaceChildren();
-        naytaLisaa();
+        hakusana = hakukentta.value.trim();
+        lataaKirjoja();
     });
 
-    // Siirrä kohdistus ensimmäiseen lisättyyn kirjaan.
     lisaaPainike.addEventListener("click", function () {
-        const ensimmainenUusiOtsikko = naytaLisaa();
-
-        if (ensimmainenUusiOtsikko) {
-            ensimmainenUusiOtsikko.focus();
+        if (aktiivinenPyynto === null && seuraavaSivu !== null) {
+            lataaKirjoja(true);
         }
     });
 
-    // Sulje ohjevalikko ennen siirtymistä hakukenttään.
+    uudelleenPainike.addEventListener("click", () => lataaKirjoja());
+
     hakuunLinkki.addEventListener("click", function () {
         ohjevalikko.hidePopover?.();
+        hakukentta.focus();
     });
 
-    // Näytä ensimmäinen erä sivun avautuessa.
-    naytaLisaa();
+    lataaKirjoja();
+}
+
+function muotoileAukioloajat(tunnit) {
+    if (!Array.isArray(tunnit)) {
+        return rajapinnanTeksti(tunnit);
+    }
+
+    const aukioloajat = [];
+
+    for (const jakso of tunnit) {
+        const paivat = rajapinnanTeksti(jakso?.days);
+        const alkaa = rajapinnanTeksti(jakso?.open);
+        const paattyy = rajapinnanTeksti(jakso?.close);
+
+        if (paivat && alkaa && paattyy) {
+            aukioloajat.push(`${paivat} klo ${alkaa}–${paattyy}`);
+        }
+    }
+
+    return aukioloajat.join(", ");
+}
+
+function alustaAsiakastiedot() {
+    const tietolista = document.getElementById("asiakastiedot");
+
+    if (!tietolista) {
+        return;
+    }
+
+    const tilanne = document.getElementById("asiakastilanne");
+    const uudelleenPainike = document.getElementById("lataa-asiakastiedot-uudelleen");
+
+    async function lataaAsiakastiedot() {
+        if (document.activeElement === uudelleenPainike) {
+            tilanne.focus();
+        }
+
+        uudelleenPainike.hidden = true;
+        tietolista.setAttribute("aria-busy", "true");
+        tilanne.textContent = "Ladataan myymälän tietoja…";
+
+        try {
+            const asiakas = await haeJson(rajapinnanOsoite("customer"), viesti => {
+                tilanne.textContent = viesti;
+            });
+
+            const tiedot = [
+                ["Yritys", rajapinnanTeksti(asiakas?.company)],
+                ["Yhteyshenkilö", rajapinnanTeksti(asiakas?.contact)],
+                ["Osoite", rajapinnanTeksti(asiakas?.address)],
+                ["Aukioloajat", muotoileAukioloajat(asiakas?.hours)]
+            ].filter(([, arvo]) => arvo);
+
+            tietolista.replaceChildren();
+
+            for (const [nimi, arvo] of tiedot) {
+                const otsikko = document.createElement("dt");
+                otsikko.textContent = nimi;
+                const kuvaus = document.createElement("dd");
+                kuvaus.textContent = arvo;
+                tietolista.append(otsikko, kuvaus);
+            }
+
+            tietolista.hidden = tiedot.length === 0;
+            tilanne.textContent = tietolista.hidden
+                ? "Myymälän tietoja ei ole saatavilla."
+                : "Myymälän tiedot ladattu.";
+        } catch {
+            tilanne.textContent = "Myymälän tietoja ei voitu ladata. Yritä uudelleen.";
+            uudelleenPainike.hidden = false;
+        } finally {
+            tietolista.removeAttribute("aria-busy");
+        }
+    }
+
+    uudelleenPainike.addEventListener("click", lataaAsiakastiedot);
+    lataaAsiakastiedot();
 }
 
 function alustaKirjatoive() {
@@ -272,4 +461,5 @@ function alustaKirjatoive() {
 }
 
 alustaKirjavalikoima();
+alustaAsiakastiedot();
 alustaKirjatoive();
