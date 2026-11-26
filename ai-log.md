@@ -31,3 +31,8 @@ A: Lisättiin `<main>` osiot, sekä kirjaluettelo ja kirjatoive-lomakkeet
 - Neuvoja `localstorage` - tallennuksen toimintaan
 - Apua popover-valikon kanssa
 - Skriptien siistiminen app.js tiedostoon
+
+# Tehtävä E4
+
+- Vertaa sivujani tarkistuslistaan ja kerro puuttuvat kohdat
+- Apua rajapintaan yhdistämisessä ja testauksessa
